@@ -1,0 +1,70 @@
+{% extends "base.html.twig" %}
+{% block title %}
+Welcome
+{% endblock %}
+
+{% block stylesheets  %}
+<style>
+/* Style for the h1 element */
+h1 {
+    font-size: 24px;
+    color: #333; /* Dark gray color */
+}
+
+/* Style for the h2 element */
+h2 {
+    font-size: 20px;
+    color: #666; /* Medium gray color */
+}
+
+/* Style for the div element */
+div {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* Style for the main menu */
+#main-menu {
+    background-color: #f2f2f2; /* Light gray background */
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Style for the sidebar menu */
+#sidebar-menu {
+    background-color: #eaeaea; /* Lighter gray background */
+    padding: 10px;
+    border-radius: 5px;
+}
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+
+<h1>Welcome!</h1>
+<h2>Symfony Start</h2>
+<div>
+{{ knp_menu_render('main') }}
+{{ knp_menu_render('sidebar') }}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+// Function to toggle visibility of sidebar menu
+function toggleSidebar() {
+    var sidebar = document.getElementById('sidebar-menu');
+    sidebar.classList.toggle('show');
+}
+
+// Add event listener to sidebar toggle button
+var toggleButton = document.getElementById('toggle-sidebar-button');
+toggleButton.addEventListener('click', toggleSidebar);
+
+</script>
+{% endblock %}
+
+
