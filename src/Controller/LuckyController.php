@@ -68,5 +68,25 @@ class LuckyController extends AbstractController
     {
         return $this->render('testimonial.html.twig');
     }
+    #[Route('/lucky/list', name: 'list')]
+    public function list()
+    {
+        $list1 = [
+            'name' => 'ali',
+            'age' => 25,
+            'city' => 'karachi',
+        ];
+        $list2 = [
+            'name' => 'sara',
+            'age' => 25,
+            'city' => 'karachi',
+        ];
+        $list3 = [
+            'name' => 'makkah',
+            'age' => 25,
+            'city' => 'karachi',
+        ];
+        return $this->render('list.html.twig', ["list" => [$list1,$list2,$list3]]);
+    }
 
 }

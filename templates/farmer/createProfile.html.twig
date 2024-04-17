@@ -1,0 +1,91 @@
+{# templates/farmer/create.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Farmer Registration Form{% endblock %}
+
+{% block body %}
+{# templates/author/validation.html.twig #}
+{# <h3>The farmer has the following errors</h3>
+<ul>
+{% for error in errors %}
+    <li>{{ error.message }}</li>
+{% endfor %}
+</ul> #}
+<div class="form-container">
+    <h2>Farmer Registration Form</h2>
+    {{ form_start(form) }}
+
+    <div class="form-group">
+        {{ form_label(form.firstName) }}
+        {{ form_widget(form.firstName) }}
+    {% if form_errors(form.firstName) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.firstName) }}
+        </div>
+    {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.lastName) }}
+        {{ form_widget(form.lastName) }}
+    {% if form_errors(form.lastName) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.lastName) }}
+        </div>
+    {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+    {% if form_errors(form.email) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.email) }}
+        </div>
+    {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.phone) }}
+        {{ form_widget(form.phone) }}
+    {% if form_errors(form.phone) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.phone) }}
+        </div>
+    {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password) }}
+            {% if form_errors(form.password) %}
+                <div class="alert alert-danger">
+                    {{ form_errors(form.password) }}
+                </div>
+            {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.image) }}
+        {{ form_widget(form.image) }}
+    {% if form_errors(form.image) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form.image) }}
+        </div>
+    {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form_widget(form.submit) }}
+    </div>
+    {{ form_end(form) }}
+    
+    {# Display form errors #}
+    {% if form_errors(form) %}
+        <div class="alert alert-danger">
+            {{ form_errors(form) }}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
