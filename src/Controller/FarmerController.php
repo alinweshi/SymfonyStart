@@ -4,18 +4,58 @@ namespace App\Controller;
 
 use App\Entity\Farmers;
 use App\Form\TaskType;
+use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Twig\Environment;
 
 // Add this line
 
 class FarmerController extends AbstractController
 {
+
+    public function uploadFile(Request $request, PersistenceManagerRegistry $doctrine, SluggerInterface $slugger)
+    {
+        $farmer = $doctrine->getRepository(Farmers::class)->find(1);
+
+        // Get the uploaded file from the request
+        $uploadedFile = $request->files->get('image');
+
+        // Check if a file was uploaded
+        if ($uploadedFile instanceof UploadedFile) {
+            // Handle file upload logic here (e.g., move the file to a directory)
+            $originalFilename = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $safeFilename = $slugger->slug($originalFilename);
+            $fileName = $safeFilename . '-' . uniqid() . '.' . $uploadedFile->guessExtension();
+
+            // Move the uploaded file to the desired location
+            try {
+                $uploadedFile->move(
+                    $this->getParameter('public_uploads_directory'),
+                    $fileName
+                );
+            } catch (FileException $e) {
+                // Handle file upload error
+                // e.g., display an error message or log the error
+            }
+
+            // Assuming $farmer is an instance of your Farmers entity
+            // Set the uploaded file as the image using its file path
+            $farmer->setImage($fileName); // Set the file name or path in the entity
+        }
+
+        // Persist and flush the entity to save changes to the database
+        // $entityManager = $doctrine->getManager();
+        // $entityManager->persist($farmer);
+        // $entityManager->flush();
+    }
+
     #[Route('/farmer', name: 'app_farmer')]
     public function index(): Response
     {
@@ -24,142 +64,48 @@ class FarmerController extends AbstractController
         ]);
     }
 
-    // #[Route('/farmer/createProfile', name: 'createProfile')]
-    // public function createProfile()
-    // {
-    //     return $this->render('farmer/createProfile.html.twig');
-    // }
-
     #[Route('/farmer/createProfile', name: 'createProfile')]
-
-    public function createProfile(Environment $twig, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator)
+    public function createProfile(Request $request, FileUploader $fileUploader, PersistenceManagerRegistry $doctrine, EntityManagerInterface $entityManager, ValidatorInterface $validator, SluggerInterface $slugger): Response
     {
         $farmer = new Farmers();
         $form = $this->createForm(TaskType::class, $farmer);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Retrieve data from the form
-            $farmer = $form->getData();
-
-            // // Process the form data
-            // $firstName = $request->request->get('firstName');
-            // $lastName = $request->request->get('lastName');
-            // $email = $request->request->get('email');
-            // $phone = $request->request->get('phone');
-            // $password = $request->request->get('password');
-            // $image = $request->request->get('image');
-            // $errors = $validator->validate($farmer);
-
-            // // Create a new Farmer entity
-            // $farmer->setFirstName($firstName);
-            // $farmer->setLastName($lastName);
-            // $farmer->setEmail($email);
-            // $farmer->setPhone($phone);
-            // $farmer->setPassword($password);
-            // $farmer->setImage($image);
-            // // Set other properties as needed
-            // // $farmer->setImage($image);
-
+            // Handle file upload
+            $image = $form->get('image')->getData();
+            if ($image) {
+                $image = $fileUploader->upload($image);
+                $farmer->setImage($image);
+            }
             // Persist the entity to the database
             $entityManager->persist($farmer);
             $entityManager->flush();
 
-            // Redirect to a success page or return a success response
+            // Redirect to a success page
             return $this->redirectToRoute('farmer_success');
         }
 
         // Render the form
-        return new Response($twig->render('farmer/createProfile.html.twig', ['form' => $form->createView()])
-        );
-
+        return $this->render('farmer/createProfile.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/farmer/success', name: 'farmer_success')]
-
     public function success(): Response
     {
         // Render a success page
         return $this->render('farmer/success.html.twig');
     }
-    // public function store(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator)
+
+    // public function viewProfile()
     // {
-    //     // Get form data from the request
-    //     $firstName = $request->request->get('firstName');
-    //     $lastName = $request->request->get('lastName');
-    //     $email = $request->request->get('email');
-    //     $phone = $request->request->get('phone');
-    //     $password = $request->request->get('password');
-
-    //     // Validate each form field individually
-    //     $errors = [
-    //         'firstName' => $validator->validate($firstName, [
-    //             new NotBlank(['message' => 'Please enter your first name']),
-    //             new Length(
-    //                 min: 10,
-    //                 max: 50,
-    //                 minMessage: 'Your first name must be at least {{ limit }} characters long',
-    //                 maxMessage: 'Your first name cannot be longer than {{ limit }} characters',
-    //             ),
-    //         ]),
-    //         'lastName' => $validator->validate($lastName, [
-    //             new NotBlank(['message' => 'Please enter your last name']),
-    //         ]),
-    //         'email' => $validator->validate($email, [
-    //             new NotBlank(['message' => 'Please enter your email']),
-    //             new Email(['message' => 'Please enter a valid email']),
-    //         ]),
-    //         'phone' => $validator->validate($phone, [
-    //             new NotBlank(['message' => 'Please enter your phone number']),
-    //         ]),
-    //         'password' => $validator->validate($password, [
-    //             new NotBlank(['message' => 'Please enter your password']),
-    //             new PasswordStrength([
-    //                 'minScore' => PasswordStrength::STRENGTH_VERY_STRONG, // Very strong password required
-    //                 'message' => 'Your password is not strong enough',
-    //             ]),
-    //         ]),
-    //     ];
-
-    //     // Check if there are any errors
-    //     foreach ($errors as $fieldErrors) {
-    //         if (count($fieldErrors) > 0) {
-    //             // If there are errors, return them as a JSON response
-    //             return new Response($fieldErrors);
-    //         }
-    //     }
-
-    //     // If no errors, continue with saving the farmer entity
-    //     $farmer = new Farmers();
-    //     $farmer->setFirstName($firstName);
-    //     $farmer->setLastName($lastName);
-    //     $farmer->setEmail($email);
-    //     $farmer->setPhone($phone);
-    //     $farmer->setPassword($password);
-
-    //     $entityManager->persist($farmer);
-    //     $entityManager->flush();
-
-    //     // Return a success response
-    //     return $this->json(['message' => 'Farmer created successfully']);
+    //     return $this->render('farmer/viewProfile.html.twig');
     // }
 
-    // tell Doctrine you want to (eventually) save the farmer (no queries yet)
-    //     $entityManager->persist($farmer);
-
-    //     // actually executes the queries (i.e. the INSERT query)
-    //     $entityManager->flush();
-
-    //     return new Response('Saved new farmer with id ' . $farmer->getId());
+    // public function editProfile()
+    // {
+    //     return $this->render('farmer/editProfile.html.twig');
     // }
-
-    public function viewProfile()
-    {
-        return $this->render('farmer/viewProfile.html.twig');
-    }
-
-    public function editProfile()
-    {
-        return $this->render('farmer/editProfile.html.twig');
-    }
 }

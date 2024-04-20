@@ -75,7 +75,7 @@ class Farmers
     )]
     #[ORM\Column(type: 'string')]
 
-    private ?File $image;
+    private ?string $image;
 
     public function getId(): ?int
     {
@@ -139,12 +139,12 @@ class Farmers
 
         return $this;
     }
-    public function setImage(?File $image = null): void
+    public function setImage(?string $image = null): void
     {
         $this->image = $image;
     }
 
-    public function getImage(): File
+    public function getImage(): string
     {
         return $this->image;
     }
