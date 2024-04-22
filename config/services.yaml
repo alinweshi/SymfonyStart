@@ -14,10 +14,36 @@ services:
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
     # config/services.yaml
     # ...
+    # Define SmsController as a service
+  App\Controller\Sms\SmsController:
+    # Specify the class of the controller
+    class: App\Controller\Sms\SmsController
+    # Tag the controller with controller.service_arguments
+    tags: ["controller.service_arguments"]
 
   App\Service\FileUploader:
     arguments:
       $targetDirectory: "%brochures_directory%"
+  App\MessageHandler\SmsNotificationHandler:
+    tags: [messenger.message_handler]
+  Twilio\Rest\Client:
+    arguments:
+      $username: "%env(TWILIO_ACCOUNT_SID)%"
+      $password: "%env(TWILIO_AUTH_TOKEN)%"
+      $accountSid: null
+      $region: null
+      $httpClient: null
+      $environment: null
+      $userAgentExtensions: null
+    # or configure with options
+    # tags:
+    #     -
+    #         name: messenger.message_handler
+    #         # only needed if can't be guessed by type-hint
+    #         handles: App\Message\SmsNotification
+  App\Services\SmsService:
+    arguments:
+      $fromPhoneNumber: 01091092848 # Assuming TWILIO_PHONE_NUMBER is the environment variable for the sender phone number
 
   # makes classes in src/ available to be used as services
   # this creates a service per class whose id is the fully-qualified class name

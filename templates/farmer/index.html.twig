@@ -1,104 +1,47 @@
-{% extends 'base.html.twig' %}
-
-{% block title %}Hello FarmerController!{% endblock %}
-
+{% extends "base.html.twig" %}
 {% block body %}
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-}
-
-.form-container {
-    max-width: 400px;
-    margin: 50px auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.form-container h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-label {
-    display: block;
-    font-weight: bold;
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"] {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-
-button[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-button[type="submit"]:hover {
-    background-color: #0056b3;
-}
-
-/* Add additional styles as needed */
-
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello Farmer! ✅</h1>
-
-    This friendly message is coming from:
-<body>
-{# templates/author/validation.html.twig #}
-<h3>The author has the following errors</h3>
-<ul>
-{% for error in errors %}
-    <li>{{ error.message }}</li>
-{% endfor %}
-</ul>
-    <div class="form-container">
-        <h2>Farmer Registration Form</h2>
-<form action="{{ path('store') }}" method="post">
-            <div class="form-group">
-                <label for="firstName">First Name:</label>
-                <input type="text" id="firstName" name="firstName" required>
-            </div>
-            <div class="form-group">
-                <label for="lastName">Last Name:</label>
-                <input type="text" id="lastName" name="lastName" required>
-            </div>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-                <label for="phone">Phone:</label>
-                <input type="text" id="phone" name="phone" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <div class="form-group">
-                <button type="submit">Submit</button>
-            </div>
-        </form>
+{# templates/farmer/edit.html.twig #}
+{% if app.flashes('success') %}
+    <div class="alert alert-success">
+Farmer details updated successfully! 
     </div>
-</div>
+{% endif %}
+{% if app.flashes('delete') %}
+    <div class="alert alert-danger">
+Farmer details deleted successfully! 
+    </div>
+{% endif %}
+
+<table class="table table-dark">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">FirstName</th>
+      <th scope="col">LastName</th>
+      <th scope="col">email</th>
+      <th scope="col">phone</th>
+      <th scope="col">image</th>
+      <th scope="col">edit</th>
+      <th scope="col">delete</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for farmer in farmers %}
+    <tr>
+      <td>{{ farmer.id }}</td>
+      <td>{{ farmer.FirstName }}</td>
+      <td>{{ farmer.LastName }}</td>
+      <td>{{ farmer.email }}</td>
+      <td>{{ farmer.phone }}</td>
+      <td>{{ farmer.image }}</td>
+{# <td>
+    <img src="{{ asset('uploads/brochures/' ~ farmer.image) }}" alt="{{ farmer.image }}">
+</td> #}
+<td><button type="button" class="btn btn-primary"><a href="{{ path("farmer_edit", {'id': farmer.id}) }}">edit</a></button></td>
+<td><button type="button" class="btn btn-danger"><a href="{{ path("farmer_delete", {'id': farmer.id}) }}">delete</a></button></td>
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
 {% endblock %}
+

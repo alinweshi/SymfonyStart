@@ -54,25 +54,14 @@ class Farmers
     #[Assert\NotBlank]
     #[Assert\Length(max: 255)]
     #[ORM\Column(type: 'string')]
-    #[Assert\PasswordStrength([
-            'minScore' => PasswordStrength::STRENGTH_VERY_STRONG, // Very strong password required
-            'message' => 'Your password is too easy to guess. Company\'s security policy requires to use a stronger password.',
-        ])]
+    // #[Assert\PasswordStrength([
+    //         'minScore' => PasswordStrength::STRENGTH_WEAK,// Very strong password required
+    //         'message' => 'Your password is too easy to guess. Company\'s security policy requires to use a stronger password.',
+    //     ])]
     private ?string $password = null;
 
     #[Assert\NotBlank]
-    #[Assert\Image(
-        mimeTypes: [
-            'image/png',
-            'image/jpeg',
-            'image/jpg',
-            'image/gif',
-            'image/webp',
-            'image/avif',
-            'image/svg+xml',
-        ],
-        mimeTypesMessage: "The image is not a valid image. Please use a valid image.",
-    )]
+    #[Assert\Image]
     #[ORM\Column(type: 'string')]
 
     private ?string $image;

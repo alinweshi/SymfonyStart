@@ -2,18 +2,19 @@
 
 namespace App\Controller;
 
-use App\Entity\Farmers;
 use App\Form\TaskType;
+use App\Entity\Farmers;
 use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\Session\Flash\FlashBagInterface;
+use Doctrine\Persistence\ManagerRegistry as PersistenceManagerRegistry;
 
 // Add this line
 
@@ -56,11 +57,16 @@ class FarmerController extends AbstractController
         // $entityManager->flush();
     }
 
-    #[Route('/farmer', name: 'app_farmer')]
-    public function index(): Response
+    #[Route('/farmers', name: 'farmers')]
+    public function index(EntityManagerInterface $entityManager): Response
     {
+        $farmers = $entityManager->getRepository(farmers::class);
+        // look for *all* Product objects
+        $farmers = $farmers->findAll();
+
         return $this->render('farmer/index.html.twig', [
             'controller_name' => 'FarmerController',
+            "farmers"=>$farmers,
         ]);
     }
 
@@ -99,13 +105,60 @@ class FarmerController extends AbstractController
         return $this->render('farmer/success.html.twig');
     }
 
-    // public function viewProfile()
-    // {
-    //     return $this->render('farmer/viewProfile.html.twig');
-    // }
+    #[Route('/farmer/show/{id}', name: 'farmer_show')]
 
-    // public function editProfile()
-    // {
-    //     return $this->render('farmer/editProfile.html.twig');
-    // }
+    public function show(EntityManagerInterface $entityManager, int $id)
+    {
+        $farmer = $entityManager->getRepository(Farmers::class)->find($id);
+
+        if (!$farmer) {
+            throw $this->createNotFoundException(
+                'No farmer found for id ' . $id
+            );
+        }
+
+        return $this->render('farmer/show.html.twig', ['farmer' => $farmer]);
+
+    }
+    #[Route('/farmer/{id}/edit', name: 'farmer_edit')]
+    public function edit(Request $request, EntityManagerInterface $entityManager, Farmers $farmer, FileUploader $fileUploader): Response
+    {
+        // Create the form using the TaskType form type class
+        $form = $this->createForm(TaskType::class, $farmer);
+
+        // Handle form submission
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Handle image upload
+            $image = $form->get('image')->getData();
+            if ($image) {
+                $image = $fileUploader->upload($image);
+                $farmer->setImage($image);
+            }
+
+            // Persist changes to the database
+            $entityManager->flush();
+            $this->addFlash('success', 'Farmer details updated successfully!');
+            // Redirect to the farmer show page
+            return $this->redirectToRoute('farmer_show', ['id' => $farmer->getId()]);
+        }
+
+        // Render the edit form template with the form object
+        return $this->render('farmer/edit.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+    
+    #[Route('/farmer/{id}/delete', name: 'farmer_delete')]
+
+    public function delete(EntityManagerInterface $entityManager, Farmers $farmer,int $id){
+            $entityManager->remove($farmer);
+            $entityManager->flush();
+            $this->addFlash('delete', 'Farmer deleted successfully!');
+            // Redirect to the farmer show page
+            return $this->redirectToRoute('farmers');
+    }
+
+    // Other controller methods...
+
 }

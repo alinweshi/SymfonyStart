@@ -21,8 +21,10 @@ class TaskType extends AbstractType
             ->add('email', EmailType::class)
             ->add('phone', TextType::class)
             ->add('password', PasswordType::class)
-            ->add('image', FileType::class)
-            ->add('submit', SubmitType::class);
+            ->add('image', FileType::class, [
+                'required' => false, // Depending on your requirements
+                'data_class' => null, // Allow any data type
+            ])->add('submit', SubmitType::class);
 
     }
 
